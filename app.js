@@ -2,6 +2,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const routes = require('./routes'); 
 
 dotenv.config();
 const app = express();
@@ -14,8 +15,13 @@ connectDB();
 app.use(express.json());
 
 // Routes
-const particularRoutes = require('./services/particular/particular.routes');
-app.use('/particulars', particularRoutes);
+// const particularRoutes = require('./services/particular/particular.routes');
+// app.use('/particulars', particularRoutes);
+
+// const purchaseRoutes = require('./services/purchase/purchase.routes');
+// app.use('/purchase', purchaseRoutes);
+
+app.use('/', routes);
 
 // Health check
 app.get('/', (req, res) => {
