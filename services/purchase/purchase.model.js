@@ -18,7 +18,7 @@ const purchaseSchema = new Schema({
     amount: Number,
     consignmentNumber: String
   },
-  payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
+  payments: [{ type: Schema.Types.ObjectId, ref: 'PurchasePayment' }],
 
   createdDate: Date,
   modifiedDate: Date,

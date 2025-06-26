@@ -1,5 +1,5 @@
 const Purchase = require('../purchase.model');
-const Payment = require('./payment.model');
+const PurchasePayment = require('./payment.model');
 
 async function createPayment(seasonId, purchaseId, paymentData) {
   const purchase = await Purchase.findOne({
@@ -32,7 +32,7 @@ async function createPayment(seasonId, purchaseId, paymentData) {
   paymentData.createdDate = new Date();
   paymentData.modifiedDate = new Date();
 
-  const payment = new Payment(paymentData);
+  const payment = new PurchasePayment(paymentData);
   await payment.save();
   await Purchase.findByIdAndUpdate(purchaseId, {
     $push: { payments: payment._id }

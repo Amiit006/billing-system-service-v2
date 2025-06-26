@@ -30,6 +30,21 @@ async function getClientsByIds(ids) {
   return await Client.find({ _id: { $in: ids } });
 }
 
+async function isClientPresentByClientId(clientId) {
+  const client = await Client.findById(clientId);
+  if (!client) {
+    const error = new Error('Client Not Present');
+    error.status = 404;
+    throw error;
+  }
+  return true;
+}
+
+async function deleteClient(clientId) {
+  const result = await Client.findByIdAndDelete(clientId);
+  return result !== null;
+}
+
 async function isClientPresent(data) {
   const existing = await Client.findOne({
     _id: data.clientId,
@@ -45,5 +60,7 @@ module.exports = {
   createClient,
   updateClient,
   getClientsByIds,
+  isClientPresentByClientId,
+  deleteClient,
   isClientPresent
 };
