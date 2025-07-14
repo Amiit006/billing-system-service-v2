@@ -6,6 +6,7 @@ const getAllClients = async (req, res) => {
     const result = await service.getAllClients();
     res.json(result);
   } catch (err) {
+    console.error('Error fetching clients:', err);
     res.status(500).json({ message: 'Failed to fetch clients' });
   }
 };
@@ -15,6 +16,7 @@ const getClientById = async (req, res) => {
     const result = await service.getClientById(req.query.clientId);
     res.json(result);
   } catch (err) {
+    console.error('Error fetching clients:', err);
     res.status(err.status || 500).json({ message: err.message });
   }
 };

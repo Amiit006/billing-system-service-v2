@@ -1,16 +1,30 @@
-// services/particular/particular.model.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const ParticularSchema = new mongoose.Schema({
-  particularName: {
-    type: String,
-    required: true,
-    unique: true
+const particularSchema = new mongoose.Schema(
+  {
+    particularId: {
+      type: Number,
+      required: true,
+      unique: true, // Mirrors AUTO_INCREMENT
+    },
+    particularName: {
+      type: String,
+      required: true,
+      unique: true, // Matches UNIQUE KEY
+      maxlength: 45,
+    },
+    discountPercentage: {
+      type: Number,
+      default: 0,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
-  discountPercentage: {
-    type: Number,
-    required: true
+  {
+    collection: "particulars",
   }
-}, { timestamps: true });
+);
 
-module.exports = mongoose.model('Particular', ParticularSchema);
+module.exports = mongoose.model("Particular", particularSchema);
