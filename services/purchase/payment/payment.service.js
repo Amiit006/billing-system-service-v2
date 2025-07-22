@@ -1,9 +1,13 @@
 const Purchase = require('../purchase.model');
 const PurchasePayment = require('./payment.model');
 
+/**
+ * Create a new payment for a purchase.
+ * Validates against overpayment and ensures purchase exists for given season and purchaseId.
+ */
 async function createPayment(seasonId, purchaseId, paymentData) {
   const purchase = await Purchase.findOne({
-    _id: purchaseId,
+    purchaseId: purchaseId,
     season: seasonId,
   }).populate('payments');
 
@@ -16,27 +20,33 @@ async function createPayment(seasonId, purchaseId, paymentData) {
   const totalPaid = (purchase.payments || []).reduce((acc, p) => acc + p.amount, 0);
 
   const finalPayableAmount =
-    purchase.purchaseAmount +
-    purchase.packingCharge +
-    purchase.taxAmount -
-    purchase.discountAmount -
-    purchase.extraDiscountAmount;
+    (purchase.purchaseAmount || 0) +
+    (purchase.packingCharge || 0) +
+    (purchase.taxAmount || 0) -
+    (purchase.discountAmount || 0) -
+    (purchase.extraDiscountAmount || 0);
 
   if (totalPaid + paymentData.amount > finalPayableAmount) {
-    const err = new Error('unexpected amount');
+    const err = new Error('Unexpected amount: payment exceeds final payable amount');
     err.status = 400;
     throw err;
   }
 
-  paymentData.purchase = purchaseId;
-  paymentData.createdDate = new Date();
-  paymentData.modifiedDate = new Date();
-
-  const payment = new PurchasePayment(paymentData);
-  await payment.save();
-  await Purchase.findByIdAndUpdate(purchaseId, {
-    $push: { payments: payment._id }
+  // Save the new payment
+  const payment = new PurchasePayment({
+    ...paymentData,
+    createdDate: new Date(),
+    modifiedDate: new Date(),
   });
+
+  await payment.save();
+
+  // Add payment reference to Purchase
+  await Purchase.updateOne(
+    { purchaseId: purchaseId },
+    { $push: { payments: payment._id } }
+  );
+
   return payment;
 }
 

@@ -1,10 +1,14 @@
+// services/purchase/season/season.service.js
+
 const Season = require('./season.model');
 const { isWithinRange } = require('../../../utils/dateUtils');
 
+// Get all seasons sorted by startDate
 const getAllSeasons = async () => {
   return await Season.find().sort({ startDate: 1 });
 };
 
+// Create a new season with manual seasonId
 const createSeason = async (input) => {
   const { seasonName, startDate, endDate } = input;
 
@@ -12,11 +16,13 @@ const createSeason = async (input) => {
     throw { status: 400, message: "End Date can't be before start Date" };
   }
 
+  // Check for duplicate season name
   const existingByName = await Season.findOne({ seasonName });
   if (existingByName) {
     throw { status: 400, message: 'Season Name already exists' };
   }
 
+  // Check for overlapping dates
   const existingSeasons = await getAllSeasons();
   for (let existing of existingSeasons) {
     if (
@@ -27,8 +33,13 @@ const createSeason = async (input) => {
     }
   }
 
+  const lastSeason = await Season.findOne().sort({ seasonId: -1 }).lean();
+  const nextSeasonId = lastSeason ? lastSeason.seasonId + 1 : 1;
+
   const now = new Date();
+
   return await Season.create({
+    seasonId: nextSeasonId,
     seasonName,
     startDate,
     endDate,
@@ -37,6 +48,7 @@ const createSeason = async (input) => {
   });
 };
 
+// Update an existing season by seasonId
 const updateSeason = async (seasonId, input) => {
   const { seasonName, startDate, endDate } = input;
 
@@ -44,12 +56,14 @@ const updateSeason = async (seasonId, input) => {
     throw { status: 400, message: "End Date can't be before start Date" };
   }
 
-  const season = await Season.findById(seasonId);
+  const season = await Season.findOne({ seasonId: parseInt(seasonId) });
   if (!season) {
     throw { status: 404, message: 'Season not present' };
   }
 
-  if (season.seasonName === seasonName) {
+  // Prevent updating with duplicate season name
+  const existingWithSameName = await Season.findOne({ seasonName });
+  if (existingWithSameName && existingWithSameName.seasonId !== parseInt(seasonId)) {
     throw { status: 400, message: 'Season Name already exists' };
   }
 

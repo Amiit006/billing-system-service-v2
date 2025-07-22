@@ -1,8 +1,33 @@
-const purchaseModel = require('../purchase.model');
+const Purchase = require('../purchase.model');
+const Transport = require('../transport.model');
+const PurchasePayment = require('../payment/payment.model');
 
 async function getDashboardStats(seasonId) {
-  const purchases = await purchaseModel.find({ 'season.seasonId': parseInt(seasonId) });
+  const season = parseInt(seasonId);
 
+  // 1️⃣ Fetch all purchases for the season
+  const purchases = await Purchase.find({ seasonId: season }).lean();
+
+  // Extract transportIds and purchaseIds
+  const transportIds = purchases.map(p => p.transportId).filter(Boolean);
+  const purchaseIds = purchases.map(p => p.purchaseId);
+
+  // 2️⃣ Fetch all relevant transports
+  const transports = await Transport.find({ transportId: { $in: transportIds } }).lean();
+  const transportMap = new Map(transports.map(t => [t.transportId, t]));
+
+  // 3️⃣ Fetch all relevant payments
+  const payments = await PurchasePayment.find({ purchaseId: { $in: purchaseIds } }).lean();
+  const paymentMap = new Map(); // purchaseId => [payments]
+
+  for (const pay of payments) {
+    if (!paymentMap.has(pay.purchaseId)) {
+      paymentMap.set(pay.purchaseId, []);
+    }
+    paymentMap.get(pay.purchaseId).push(pay);
+  }
+
+  // 4️⃣ Calculate totals
   let totalBasePurchaseAmount = 0;
   let totalTaxAmount = 0;
   let totalPackingCharge = 0;
@@ -18,14 +43,14 @@ async function getDashboardStats(seasonId) {
     totalDiscAmount += p.discountAmount || 0;
     totalExtraDiscAmount += p.extraDiscountAmount || 0;
 
-    if (p.transport && p.transport.amount) {
-      totalTransportCharges += p.transport.amount || 0;
+    const transport = transportMap.get(p.transportId);
+    if (transport?.amount) {
+      totalTransportCharges += transport.amount || 0;
     }
 
-    if (Array.isArray(p.payments)) {
-      for (const pay of p.payments) {
-        totalPaymentAmount += pay.amount || 0;
-      }
+    const paymentsForPurchase = paymentMap.get(p.purchaseId) || [];
+    for (const pay of paymentsForPurchase) {
+      totalPaymentAmount += pay.amount || 0;
     }
   }
 

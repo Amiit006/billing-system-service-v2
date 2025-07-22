@@ -1,18 +1,15 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const mongoose = require("mongoose");
 
-const paymentSchema = new Schema({
-  amount: Number,
-  paymentDate: Date,
-  mode: String,
-  chequeNo: String,
-  remark: String,
+const paymentSchema = new mongoose.Schema({
+  paymentId: { type: Number, required: true, unique: true },
+  amount: { type: Number, required: true },
+  paymentDate: { type: Date, required: true },
+  mode: { type: String, required: true },
+  chequeNo: { type: String },
+  remark: { type: String },
+  purchaseId: { type: Number, required: true, ref: "Purchase" },
   createdDate: Date,
   modifiedDate: Date,
-  purchase: {
-    type: Schema.Types.ObjectId,
-    ref: 'Purchase',
-  },
 });
 
-module.exports = mongoose.model('PurchasePayment', paymentSchema);
+module.exports = mongoose.model("PurchasePayment", paymentSchema, "purchasepayment");
