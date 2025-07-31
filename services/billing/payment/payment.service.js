@@ -1,7 +1,6 @@
-const Payment = require('./payment.model'); // Sequelize or Mongoose model
-const clientService = require('../../client/client.service'); // client validation
+const Payment = require('./payment.model');
+const clientService = require('../../client/client.service');
 const clientOutstandingService = require('../clientOutstanding/clientOutstanding.service');
-// const { InvoiceException } = require('../exception/invoice.exception');
 
 const generatePaymentId = async () => {
   const latestPayment = await Payment.findOne().sort({ paymentId: -1 }).limit(1);
@@ -15,7 +14,9 @@ const savePayment = async (paymentForm) => {
 
   const isClientPresent = await clientService.isClientPresent(clientDto);
   if (!isClientPresent) {
-    // throw new InvoiceException('Client not found!', 404);
+    const error = new Error('Client not found!');
+    error.status = 404;
+    throw error;
   }
 
   const now = new Date();

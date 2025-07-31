@@ -5,25 +5,36 @@ const Payment = require('../payment/payment.model');
 
 async function updateCustomerOutstanding(clientId) {
   try {
-    const clientInvoices = await InvoiceOverView.find({ clientId });
-    const clientPayments = await Payment.find({ clientId });
+    const [clientInvoices, clientPayments] = await Promise.all([
+      InvoiceOverView.find({ clientId }),
+      Payment.find({ clientId })
+    ]);
 
-    if (clientInvoices.length === 0 || clientPayments.length === 0) {
-      throw new Error('Error while summing total purchase or payment');
+    if (clientInvoices.length === 0 && clientPayments.length === 0) {
+      // If no invoices or payments exist, create a zero outstanding record
+      const clientOutstanding = new ClientOutstanding({
+        clientId: clientId,
+        purchasedAmount: 0,
+        paymentAmount: 0,
+        modifiedDate: new Date()
+      });
+      await clientOutstanding.save();
+      await updateCustomerOutstandingHistory(clientOutstanding);
+      return clientOutstanding;
     }
 
-    const invoiceTotal = clientInvoices.reduce((sum, invoice) => sum + invoice.grandTotalAmount, 0);
-    const paymentTotal = clientPayments.reduce((sum, payment) => sum + payment.amount, 0);
+    const invoiceTotal = clientInvoices.reduce((sum, invoice) => sum + (invoice.grandTotalAmount || 0), 0);
+    const paymentTotal = clientPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
 
-    let clientOutstanding = await ClientOutstanding.findById(clientId);
+    let clientOutstanding = await ClientOutstanding.findOne({ clientId });
 
-      if (clientOutstanding) {
+    if (clientOutstanding) {
       clientOutstanding.purchasedAmount = invoiceTotal;
       clientOutstanding.paymentAmount = paymentTotal;
       clientOutstanding.modifiedDate = new Date();
     } else {
       clientOutstanding = new ClientOutstanding({
-        _id: clientId,
+        clientId: clientId,
         purchasedAmount: invoiceTotal,
         paymentAmount: paymentTotal,
         modifiedDate: new Date()
@@ -39,7 +50,7 @@ async function updateCustomerOutstanding(clientId) {
 }
 
 async function getClientOutstandingByClientId(clientId) {
-  const clientOutstanding = await ClientOutstanding.findById(clientId);
+  const clientOutstanding = await ClientOutstanding.findOne({ clientId });
   if (!clientOutstanding) {
     const error = new Error('Client Outstanding not found!');
     error.status = 404;
@@ -50,7 +61,6 @@ async function getClientOutstandingByClientId(clientId) {
 
 async function updateCustomerOutstandingHistory(clientOutstanding) {
   const history = new ClientOutstandingHistory({
-    _id: clientOutstanding.clientId,
     clientId: clientOutstanding.clientId,
     purchasedAmount: clientOutstanding.purchasedAmount,
     paymentAmount: clientOutstanding.paymentAmount,

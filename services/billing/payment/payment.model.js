@@ -1,32 +1,18 @@
 const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
-  paymentId: {
-    type: Number,
-    required: true,
-    unique: true, // Mirrors AUTO_INCREMENT
+  paymentId: { 
+    type: Number, 
+    required: true, 
+    unique: true 
   },
-  clientId: {
-    type: Number,
-  },
-  amount: {
-    type: Number,
-  },
-  paymentMode: {
-    type: String,
-    maxlength: 20,
-  },
-  paymentDate: {
-    type: Date,
-  },
-  createdDate: {
-    type: Date,
-  },
-  modifiedDate: {
-    type: Date,
-  }
-}, {
-  collection: 'payment'
+  clientId: Number,
+  amount: Number,
+  paymentMode: String,
+  paymentDate: Date,
+  createdDate: { type: Date, default: Date.now },
+  modifiedDate: { type: Date, default: Date.now },
+  invoiceOverView: { type: mongoose.Schema.Types.ObjectId, ref: 'InvoiceOverview' }
 });
 
 module.exports = mongoose.model('Payment', paymentSchema);

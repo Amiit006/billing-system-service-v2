@@ -1,56 +1,24 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const invoiceOverviewSchema = new mongoose.Schema(
-  {
-    invoiceId: {
-      type: Number,
-      required: true,
-      unique: true, // mirrors AUTO_INCREMENT primary key
-    },
-    clientId: {
-      type: Number,
-    },
-    paymentId: {
-      type: Number, // Assuming Payment is also tracked by numeric `paymentId`
-      // If referencing Mongo ObjectId from `Payment`, change this to:
-      // type: mongoose.Schema.Types.ObjectId,
-      // ref: 'Payment',
-    },
-    invoiceDate: {
-      type: Date,
-    },
-    subTotalAmount: {
-      type: Number,
-    },
-    taxPercentage: {
-      type: Number,
-    },
-    taxAmount: {
-      type: Number,
-    },
-    discountPercentage: {
-      type: Number,
-    },
-    discountAmount: {
-      type: Number,
-    },
-    grandTotalAmount: {
-      type: Number,
-    },
-    remarks: {
-      type: String,
-      maxlength: 200,
-    },
-    createdDate: {
-      type: Date,
-    },
-    modifiedDate: {
-      type: Date,
-    },
+const invoiceOverviewSchema = new mongoose.Schema({
+  invoiceId: { 
+    type: Number, 
+    required: true, 
+    unique: true 
   },
-  {
-    collection: "invoiceoverview",
-  }
-);
+  clientId: Number,
+  paymentId: Number, // Reference to Payment.paymentId
+  invoiceDate: Date,
+  subTotalAmount: Number,
+  taxPercentage: Number,
+  taxAmount: Number,
+  discountPercentage: Number,
+  discountAmount: Number,
+  grandTotalAmount: Number,
+  remarks: String,
+  createdDate: { type: Date, default: Date.now },
+  modifiedDate: { type: Date, default: Date.now },
+  invoiceDetails: [{ type: mongoose.Schema.Types.ObjectId, ref: 'InvoiceDetails' }]
+});
 
-module.exports = mongoose.model("InvoiceOverview", invoiceOverviewSchema);
+module.exports = mongoose.model('InvoiceOverview', invoiceOverviewSchema);
