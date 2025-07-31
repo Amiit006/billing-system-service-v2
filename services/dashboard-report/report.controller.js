@@ -3,6 +3,11 @@ const reportService = require('./report.service');
 const getSellsReport = async (req, res) => {
   try {
     const { from_date, to_date } = req.query;
+    
+    if (!from_date || !to_date) {
+      return res.status(400).json({ error: 'from_date and to_date are required' });
+    }
+    
     const result = await reportService.getSellsReport(from_date, to_date);
     return res.status(200).json(result);
   } catch (error) {
@@ -14,6 +19,11 @@ const getSellsReport = async (req, res) => {
 const getCollectionsReport = async (req, res) => {
   try {
     const { from_date, to_date } = req.query;
+    
+    if (!from_date || !to_date) {
+      return res.status(400).json({ error: 'from_date and to_date are required' });
+    }
+    
     const result = await reportService.getCollectionsReport(from_date, to_date);
     return res.status(200).json(result);
   } catch (error) {
@@ -25,11 +35,12 @@ const getCollectionsReport = async (req, res) => {
 const getClientReport = async (req, res) => {
   try {
     const { from_date, to_date, clientId } = req.query;
-    const result = await reportService.getClientReport(
-      from_date, 
-      to_date, 
-      parseInt(clientId)
-    );
+    
+    if (!from_date || !to_date || !clientId) {
+      return res.status(400).json({ error: 'from_date, to_date, and clientId are required' });
+    }
+    
+    const result = await reportService.getClientReport(from_date, to_date, parseInt(clientId));
     return res.status(200).json(result);
   } catch (error) {
     console.error('Error fetching client report:', error);
@@ -40,6 +51,11 @@ const getClientReport = async (req, res) => {
 const getTradeBookReport = async (req, res) => {
   try {
     const { from_date, to_date } = req.query;
+    
+    if (!from_date || !to_date) {
+      return res.status(400).json({ error: 'from_date and to_date are required' });
+    }
+    
     const result = await reportService.getTradeBookReport(from_date, to_date);
     return res.status(200).json(result);
   } catch (error) {
@@ -51,6 +67,11 @@ const getTradeBookReport = async (req, res) => {
 const getParticularsReport = async (req, res) => {
   try {
     const { from_date, to_date } = req.query;
+    
+    if (!from_date || !to_date) {
+      return res.status(400).json({ error: 'from_date and to_date are required' });
+    }
+    
     const result = await reportService.getParticularsReport(from_date, to_date);
     return res.status(200).json(result);
   } catch (error) {
@@ -72,6 +93,11 @@ const getClientOutstandingReport = async (req, res) => {
 const getClientTradeBookReport = async (req, res) => {
   try {
     const { clientId, from_date, to_date } = req.query;
+    
+    if (!clientId || !from_date || !to_date) {
+      return res.status(400).json({ error: 'clientId, from_date, and to_date are required' });
+    }
+    
     const result = await reportService.getClientTradeBookReport(
       parseInt(clientId), 
       from_date, 
