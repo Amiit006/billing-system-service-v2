@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const clientOutstandingHistorySchema = new mongoose.Schema({
-  clientId: { type: String, required: true },
+  clientId: { type: Number, required: true },
   purchasedAmount: { type: Number, default: 0 },
   paymentAmount: { type: Number, default: 0 },
   createdDate: { type: Date, default: Date.now }

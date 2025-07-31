@@ -1,4 +1,4 @@
-const Payment = require('../models/payment.model'); // Sequelize or Mongoose model
+const Payment = require('./payment.model'); // Sequelize or Mongoose model
 const clientService = require('../../client/client.service'); // client validation
 const clientOutstandingService = require('../clientOutstanding/clientOutstanding.service');
 // const { InvoiceException } = require('../exception/invoice.exception');

@@ -1,6 +1,6 @@
-const Invoice = require('../models/invoiceOverview.model'); // InvoiceOverView model
-const InvoiceDetails = require('../models/invoiceDetails.model');
-const Payment = require('../models/payment.model');
+const Invoice = require('./invoiceOverview.model'); // InvoiceOverView model
+const InvoiceDetails = require('./invoiceDetails.model');
+const Payment = require('../payment/payment.model');
 
 const clientService = require('../../client/client.service');
 const particularService = require('../../particular/particular.service');

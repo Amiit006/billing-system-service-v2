@@ -1,7 +1,7 @@
-const ClientOutstanding = require('../models/clientOutstanding.model');
-const ClientOutstandingHistory = require('../models/clientOutstandingHistory.model');
-const InvoiceOverView = require('../models/invoiceOverview.model');
-const Payment = require('../models/payment.model');
+const ClientOutstanding = require('./clientOutstanding.model');
+const ClientOutstandingHistory = require('./clientOutstandingHistory.model');
+const InvoiceOverView = require('../invoice/invoiceOverview.model');
+const Payment = require('../payment/payment.model');
 
 async function updateCustomerOutstanding(clientId) {
   try {
