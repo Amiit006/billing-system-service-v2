@@ -25,7 +25,7 @@ const getTopSellingProducts = async (topCount) => {
         $project: {
           _id: 0,
           perticulars: "$_id",
-          totalSell: 1,
+          totalSell: { $ceil: "$totalSell" },
         },
       },
     ];
@@ -73,8 +73,8 @@ const getTopBuyer = async (topCount) => {
         $project: {
           _id: 0,
           clientName: { $ifNull: ["$clientName", "Unknown"] },
-          totalPurchasedAmount: 1,
-          totalPaymentAmount: 1,
+          totalPurchasedAmount: { $ceil: "$totalPurchasedAmount" },
+          totalPaymentAmount: { $ceil: "$totalPaymentAmount" },
         },
       },
     ];

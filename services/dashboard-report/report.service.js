@@ -5,6 +5,8 @@ const Payment = require('../billing/payment/payment.model');
 const Client = require('../client/client.model');
 const ClientOutstanding = require('../billing/clientOutstanding/clientOutstanding.model');
 
+const formatDate = require('../../utils/dateUtils').formatDate;
+
   // Equivalent to sp_get_all_sell_in_period + Java service enrichment
   const getSellsReport = async (fromDate, toDate) =>  {
     try {
@@ -15,7 +17,7 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
       const sellStats = await InvoiceOverview.find({
         invoiceDate: { $gte: from, $lte: to }
       })
-      .select('_id clientId invoiceDate subTotalAmount taxAmount discountAmount grandTotalAmount')
+      .select('invoiceId clientId invoiceDate subTotalAmount taxAmount discountAmount grandTotalAmount')
       .lean();
 
       if (sellStats.length === 0) {
@@ -42,11 +44,11 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
       const sellStatsResponses = sellStats.map(sellStat => {
         const client = clientMap[sellStat.clientId] || {};
         return {
-          invoiceId: sellStat._id,
+          invoiceId: sellStat.invoiceId,
           clientId: sellStat.clientId,
           clientName: client.clientName || 'Unknown',
           mobile: client.mobile || '',
-          invoiceDate: sellStat.invoiceDate,
+          invoiceDate: formatDate(sellStat.invoiceDate),
           subTotalAmount: sellStat.subTotalAmount,
           taxAmount: sellStat.taxAmount,
           discountAmount: sellStat.discountAmount,
@@ -71,7 +73,7 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
         paymentDate: { $gte: from, $lte: to },
         amount: { $gt: 0 }
       })
-      .select('_id clientId amount paymentMode paymentDate')
+      .select('paymentId clientId amount paymentMode paymentDate')
       .lean();
 
       if (collectionStats.length === 0) {
@@ -98,13 +100,13 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
       const collectionStatsResponses = collectionStats.map(collectionStat => {
         const client = clientMap[collectionStat.clientId] || {};
         return {
-          paymentId: collectionStat._id,
+          paymentId: collectionStat.paymentId,
           clientId: collectionStat.clientId,
           clientName: client.clientName || 'Unknown',
           mobile: client.mobile || '',
           amount: collectionStat.amount,
           paymentMode: collectionStat.paymentMode,
-          paymentDate: collectionStat.paymentDate
+          paymentDate: formatDate(collectionStat.paymentDate)
         };
       });
 
@@ -125,7 +127,7 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
         paymentDate: { $gte: from, $lte: to },
         amount: { $gt: 0 }
       })
-      .select('_id clientId amount paymentMode paymentDate')
+      .select('paymentId clientId amount paymentMode paymentDate')
       .lean();
 
       // Get client info
@@ -135,13 +137,13 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
 
       // Build response
       const collectionStatsResponses = collectionStats.map(collectionStat => ({
-        paymentId: collectionStat._id,
+        paymentId: collectionStat.paymentId,
         clientId: collectionStat.clientId,
         clientName: client?.clientName || 'Unknown',
         mobile: client?.mobile || '',
         amount: collectionStat.amount,
         paymentMode: collectionStat.paymentMode,
-        paymentDate: collectionStat.paymentDate
+        paymentDate: formatDate(collectionStat.paymentDate)
       }));
 
       return collectionStatsResponses;
@@ -160,7 +162,7 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
         clientId: clientId,
         invoiceDate: { $gte: from, $lte: to }
       })
-      .select('_id clientId invoiceDate subTotalAmount taxAmount discountAmount grandTotalAmount')
+      .select('invoiceId clientId invoiceDate subTotalAmount taxAmount discountAmount grandTotalAmount')
       .lean();
 
       // Get client info
@@ -170,11 +172,11 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
 
       // Build response
       const sellStatsResponses = sellStats.map(sellStat => ({
-        invoiceId: sellStat._id,
+        invoiceId: sellStat.invoiceId,
         clientId: sellStat.clientId,
         clientName: client?.clientName || 'Unknown',
         mobile: client?.mobile || '',
-        invoiceDate: sellStat.invoiceDate,
+        invoiceDate: formatDate(sellStat.invoiceDate),
         subTotalAmount: sellStat.subTotalAmount,
         taxAmount: sellStat.taxAmount,
         discountAmount: sellStat.discountAmount,
@@ -214,7 +216,7 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
       const invoices = await InvoiceOverview.find({
         invoiceDate: { $gte: from, $lte: to }
       })
-      .select('_id clientId grandTotalAmount invoiceDate')
+      .select('invoiceId clientId grandTotalAmount invoiceDate')
       .lean();
 
       // Get payments (Payment transactions)
@@ -222,7 +224,7 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
         paymentDate: { $gte: from, $lte: to },
         amount: { $gt: 0 }
       })
-      .select('_id clientId amount paymentDate')
+      .select('paymentId clientId amount paymentDate')
       .lean();
 
       // Combine transactions
@@ -231,10 +233,10 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
       // Add invoice transactions
       invoices.forEach(invoice => {
         tradeBooks.push({
-          id: invoice._id,
+          id: invoice.invoiceId,
           clientId: invoice.clientId,
           amount: invoice.grandTotalAmount,
-          billPaymentDate: invoice.invoiceDate,
+          billPaymentDate: formatDate(invoice.invoiceDate),
           transactionType: 'Purchase'
         });
       });
@@ -242,10 +244,10 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
       // Add payment transactions
       payments.forEach(payment => {
         tradeBooks.push({
-          id: payment._id,
+          id: payment.paymentId,
           clientId: payment.clientId,
           amount: payment.amount,
-          billPaymentDate: payment.paymentDate,
+          billPaymentDate: formatDate(payment.paymentDate),
           transactionType: 'Payment'
         });
       });
@@ -370,15 +372,16 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
       const clientOutstandingAmountsWithSlNo = clientOutstandingAmounts.map((item, index) => ({
         slNo: index + 1,
         clientName: item.clientName,
-        purchasedAmount: item.purchasedAmount,
-        paymentAmount: item.paymentAmount,
-        outstandingAmount: item.outstandingAmount
+        purchasedAmount: Math.ceil(item.purchasedAmount),
+        paymentAmount: Math.ceil(item.paymentAmount),
+        outstandingAmount: Math.ceil(item.outstandingAmount)
       }));
 
       // Calculate summary totals (equivalent to Java service logic)
       const purchasedAmount = clientOutstandingAmountsWithSlNo.reduce((sum, item) => sum + item.purchasedAmount, 0);
       const paymentAmount = clientOutstandingAmountsWithSlNo.reduce((sum, item) => sum + item.paymentAmount, 0);
       const outstandingAmount = clientOutstandingAmountsWithSlNo.reduce((sum, item) => sum + item.outstandingAmount, 0);
+
 
       const clientOutstandingAmountSummary = [
         { name: 'PurchasedAmount', value: purchasedAmount },
@@ -441,14 +444,14 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
           clientId: clientId,
           invoiceDate: { $gte: from, $lte: to }
         })
-        .select('_id clientId grandTotalAmount invoiceDate subTotalAmount discountAmount')
+        .select('invoiceId clientId grandTotalAmount invoiceDate subTotalAmount discountAmount')
         .lean(),
         Payment.find({
           clientId: clientId,
           paymentDate: { $gte: from, $lte: to },
           amount: { $gt: 0 }
         })
-        .select('_id clientId amount paymentDate')
+        .select('paymentId clientId amount paymentDate')
         .lean()
       ]);
 
@@ -460,7 +463,7 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
         clientId: clientId,
         id: -99,
         amount: openingBalance,
-        date: from,
+        date: formatDate(from),
         type: 'OpeningBalance',
         remark: 'Opening Balance'
       });
@@ -468,14 +471,14 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
       // Add invoice transactions
       invoices.forEach(invoice => {
         const remark = invoice.discountAmount > 0 
-          ? `Invoice #${invoice._id} (bill #${invoice.subTotalAmount} discount #${invoice.discountAmount})`
-          : `Invoice #${invoice._id} (Nett)`;
+          ? `Invoice #${invoice.invoiceId} (bill #${invoice.subTotalAmount} discount #${invoice.discountAmount})`
+          : `Invoice #${invoice.invoiceId} (Nett)`;
         
         transactions.push({
           clientId: invoice.clientId,
-          id: invoice._id,
+          id: invoice.invoiceId,
           amount: Math.round(invoice.grandTotalAmount * 100) / 100,
-          date: invoice.invoiceDate,
+          date: formatDate(invoice.invoiceDate),
           type: 'Purchase',
           remark: remark
         });
@@ -485,11 +488,11 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
       payments.forEach(payment => {
         transactions.push({
           clientId: payment.clientId,
-          id: payment._id,
+          id: payment.paymentId,
           amount: Math.round(payment.amount * 100) / 100,
-          date: payment.paymentDate,
+          date: formatDate(payment.paymentDate),
           type: 'Payment',
-          remark: `Payment #${payment._id}`
+          remark: `Payment #${payment.paymentId}`
         });
       });
 
@@ -504,7 +507,7 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
           return {
             billAmount: `+ ${transaction.amount}`,
             paymentAmount: null,
-            date: transaction.date,
+            date: formatDate(transaction.date),
             type: transaction.type,
             remark: transaction.remark,
             balance: balance
@@ -514,7 +517,7 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
           return {
             billAmount: null,
             paymentAmount: `- ${transaction.amount}`,
-            date: transaction.date,
+            date: formatDate(transaction.date),
             type: transaction.type,
             remark: transaction.remark,
             balance: balance
@@ -524,7 +527,7 @@ const ClientOutstanding = require('../billing/clientOutstanding/clientOutstandin
           return {
             billAmount: null,
             paymentAmount: null,
-            date: transaction.date,
+            date: formatDate(transaction.date),
             type: transaction.type,
             remark: transaction.remark,
             balance: balance
