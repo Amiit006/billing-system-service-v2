@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const invoiceOverviewSchema = new mongoose.Schema({
-  invoiceId: { 
-    type: Number, 
-    required: true, 
-    unique: true 
+  invoiceId: {
+    type: Number,
+    required: true,
+    unique: true,
   },
   clientId: Number,
   paymentId: Number, // Reference to Payment.paymentId
@@ -17,8 +17,11 @@ const invoiceOverviewSchema = new mongoose.Schema({
   grandTotalAmount: Number,
   remarks: String,
   createdDate: { type: Date, default: Date.now },
-  modifiedDate: { type: Date, default: Date.now },
-  invoiceDetails: [{ type: mongoose.Schema.Types.ObjectId, ref: 'InvoiceDetails' }]
+  modifiedDate: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('InvoiceOverview', invoiceOverviewSchema);
+module.exports = mongoose.model(
+  "InvoiceOverview",
+  invoiceOverviewSchema,
+  "invoiceoverview"
+);

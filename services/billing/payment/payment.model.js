@@ -11,8 +11,7 @@ const paymentSchema = new mongoose.Schema({
   paymentMode: String,
   paymentDate: Date,
   createdDate: { type: Date, default: Date.now },
-  modifiedDate: { type: Date, default: Date.now },
-  invoiceOverView: { type: mongoose.Schema.Types.ObjectId, ref: 'InvoiceOverview' }
+  modifiedDate: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Payment', paymentSchema);
+module.exports = mongoose.model('Payment', paymentSchema, 'payment');

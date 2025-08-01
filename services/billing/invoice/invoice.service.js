@@ -66,7 +66,7 @@ async function createBill(invoiceDetailsDto) {
 
     const invoiceDetails = invoice.map((item) => ({
       invoiceDetailsId: invoiceDetailsId++,
-      invoiceId: invoiceOverView[0]._id,
+      invoiceId: invoiceOverView[0].invoiceId,
       slNo: item.slNo,
       perticulars: item.perticulars,
       amount: item.amount,
@@ -170,7 +170,7 @@ async function updateBill(invoiceId, invoiceDetailsDto) {
     );
 
     // 5. Delete existing invoice details
-    await InvoiceDetails.deleteMany({ invoiceId: existingInvoice._id }, { session });
+    await InvoiceDetails.deleteMany({ invoiceId: existingInvoice.invoiceId }, { session });
 
     // 6. Update invoice overview
     await InvoiceOverview.findOneAndUpdate(
@@ -194,7 +194,7 @@ async function updateBill(invoiceId, invoiceDetailsDto) {
 
     const invoiceDetails = invoice.map((item) => ({
       invoiceDetailsId: invoiceDetailsId++,
-      invoiceId: existingInvoice._id,
+      invoiceId: existingInvoice.invoiceId,
       slNo: item.slNo,
       perticulars: item.perticulars,
       amount: item.amount,
@@ -252,8 +252,8 @@ async function getInvoiceById(invoiceId) {
   }
 
   // Also get invoice details
-  const invoiceDetails = await InvoiceDetails.find({ invoiceId: invoice._id });
-  
+  const invoiceDetails = await InvoiceDetails.find({ invoiceId: invoice.invoiceId });
+
   return {
     ...invoice.toObject(),
     invoiceDetails
@@ -271,15 +271,26 @@ async function getInvoiceByClientId(clientId) {
   // Get invoice details for each invoice
   const invoicesWithDetails = await Promise.all(
     invoices.map(async (invoice) => {
-      const invoiceDetails = await InvoiceDetails.find({ invoiceId: invoice._id });
+      const invoiceDetails = await InvoiceDetails.find({ invoiceId: invoice.invoiceId });
       return {
         ...invoice.toObject(),
         invoiceDetails
       };
     })
   );
-  
-  return invoicesWithDetails;
+
+  // Populate payment details for each invoice
+  const invoicesWithDetailsAndPayment = await Promise.all(
+    invoicesWithDetails.map(async (invoice) => {
+      const payment = await Payment.findOne({ paymentId: invoice.paymentId });
+      return {
+        ...invoice,
+        payment
+      };
+    })
+  );
+
+  return invoicesWithDetailsAndPayment;
 }
 
 async function addDiscountToBill(invoiceId, clientId, billAmountDetailsDto, remarks) {

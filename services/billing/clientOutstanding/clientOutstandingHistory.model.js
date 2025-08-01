@@ -7,4 +7,4 @@ const clientOutstandingHistorySchema = new mongoose.Schema({
   createdDate: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('ClientOutstandingHistory', clientOutstandingHistorySchema);
+module.exports = mongoose.model('ClientOutstandingHistory', clientOutstandingHistorySchema, 'clientoutstandinghistory');
