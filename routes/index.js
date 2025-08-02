@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const { authenticateToken } = require('../services/auth/auth.middleware');
 // Import feature-level routes
 const purchaseRoutes = require('../services/purchase/purchase.routes');
 const particularRoutes = require('../services/particular/particular.routes');
@@ -10,14 +10,17 @@ const clientOutstandingRoutes = require('../services/billing/clientOutstanding/c
 const paymentRoutes = require('../services/billing/payment/payment.routes');
 const topContentRoutes = require('../services/dashboard-report/topContent.routes');
 const reportRoutes = require('../services/dashboard-report/report.routes');
+const authRoutes = require('../services/auth/auth.routes');
 
 // Mount them
-router.use('/particulars', particularRoutes);
-router.use('/purchase', purchaseRoutes);
-router.use('/clients', clientRoutes);
-router.use('/invoice', invoiceRoutes);
-router.use('/client-outstanding', clientOutstandingRoutes);
-router.use('/payment', paymentRoutes);
-router.use('/dashboard', topContentRoutes);
-router.use('/report', reportRoutes);
+router.use('/particulars', authenticateToken, particularRoutes);
+router.use('/purchase', authenticateToken, purchaseRoutes);
+router.use('/clients', authenticateToken, clientRoutes);
+router.use('/invoice', authenticateToken, invoiceRoutes);
+router.use('/client-outstanding', authenticateToken, clientOutstandingRoutes);
+router.use('/payment', authenticateToken, paymentRoutes);
+router.use('/dashboard', authenticateToken, topContentRoutes);
+router.use('/report', authenticateToken, reportRoutes);
+router.use('/auth', authRoutes);
+
 module.exports = router;
