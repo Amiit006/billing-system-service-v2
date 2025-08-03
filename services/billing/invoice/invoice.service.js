@@ -113,19 +113,34 @@ function validateBill(invoice, billAmountDetails) {
   // Calculate discount and tax
   const discount = (subTotal * billAmountDetails.overallDiscountPercentage) / 100;
   const tax = ((subTotal - discount) * billAmountDetails.taxPercentage) / 100;
-  const grandTotal = subTotal - discount + tax;
+  const rawGrandTotal = subTotal - discount + tax;
+
+  // Round as per UI logic
+  const decimalPart = rawGrandTotal % 1;
+  const roundedGrandTotal = decimalPart >= 0.5
+    ? Math.ceil(rawGrandTotal)
+    : Math.floor(rawGrandTotal);
+
+  const roundOff = +(roundedGrandTotal - rawGrandTotal).toFixed(2);
+  const symbol = roundOff >= 0 ? '+' : '-';
 
   const round = (val) => Math.round(val * 100) / 100;
 
-  // Validate calculations
+  // Validate individual values
   if (round(subTotal) !== round(billAmountDetails.subTotalAmount)) {
     throw new Error('Subtotal mismatch');
   }
+
   if (round(tax) !== round(billAmountDetails.taxAmount)) {
     throw new Error('Tax mismatch');
   }
-  if (round(grandTotal) !== round(billAmountDetails.grandTotalAmount)) {
+
+  if (roundedGrandTotal !== billAmountDetails.grandTotalAmount) {
     throw new Error('Grand total mismatch');
+  }
+
+  if (Math.abs(roundOff) !== billAmountDetails.roundOffAmount) {
+    throw new Error('Round off mismatch');
   }
 
   // Check if all items are verified
