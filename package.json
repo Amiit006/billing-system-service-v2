@@ -6,7 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "init-products": "node scripts/initializeProductData.js",
+    "migrate-dry-run": "node scripts/migrateParticularsToProducts.js --dry-run",
+    "migrate-actual": "node scripts/migrateParticularsToProducts.js"
   },
   "keywords": [],
   "author": "",
