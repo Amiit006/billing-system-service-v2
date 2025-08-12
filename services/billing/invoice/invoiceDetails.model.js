@@ -18,6 +18,12 @@ const invoiceDetailsSchema = new mongoose.Schema({
   invoiceId: Number,
   createdDate: { type: Date, default: Date.now },
   modifiedDate: { type: Date, default: Date.now },
+  // Add these fields to existing schema
+  productId: { type: Number, default: null },
+  costPricePerUnit: { type: Number, default: 0 },
+  totalCostPrice: { type: Number, default: 0 },
+  profitAmount: { type: Number, default: 0 },
+  profitPercentage: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model(

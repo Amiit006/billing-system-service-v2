@@ -16,6 +16,7 @@ const enhancedPurchaseRoutes = require('../services/purchase/enhancedPurchase.ro
 
 const enhancedInvoiceRoutes = require('../services/billing/invoice/enhancedInvoice.routes');
 const enhancedReportRoutes = require('../services/dashboard-report/enhancedReport.routes');
+const enhancedTopContentRoutes = require('../services/dashboard-report/enhancedTopContent.routes');
 
 // Mount them
 router.use('/particulars', authenticateToken, particularRoutes);
@@ -31,6 +32,7 @@ router.use('/purchase/enhanced', authenticateToken, enhancedPurchaseRoutes);
 
 router.use('/invoice/enhanced', authenticateToken, enhancedInvoiceRoutes);
 router.use('/reports/enhanced', authenticateToken, enhancedReportRoutes);
+router.use('/dashboard/enhanced', authenticateToken, enhancedTopContentRoutes);
 
 router.use('/auth', authRoutes);
 
