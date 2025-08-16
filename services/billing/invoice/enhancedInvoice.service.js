@@ -179,12 +179,12 @@ class EnhancedInvoiceService {
         }
 
         // 3. Calculate profit
-        const sellingPricePerUnit = item.discountPrice / item.quanity;
+        const sellingPrice = item.total;
         const totalCostPrice = costPricePerUnit * item.quanity;
-        const profitAmount = item.discountPrice - totalCostPrice;
+        const profitAmount = Math.round(sellingPrice - totalCostPrice);
         const profitPercentage = totalCostPrice > 0 ? 
-          ((profitAmount / totalCostPrice) * 100) : 100;
-
+          Math.round(((profitAmount / totalCostPrice) * 100)) : 100;
+        const sellingPricePerUnit = Math.round(item.amount - item.discountPrice);
         // 4. Create enhanced item
         enhancedItems.push({
           ...item,
