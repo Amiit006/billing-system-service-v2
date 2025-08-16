@@ -5,7 +5,7 @@ const enhancedInvoiceService = require('./enhancedInvoice.service');
 
 class EnhancedInvoiceController {
 
-  // POST /invoice/createBillWithProfit
+  // POST /invoice/enhanced/createBillWithProfit
   async createBillWithProfitTracking(req, res) {
     try {
       const result = await enhancedInvoiceService.createBillWithProfitTracking(req.body);
@@ -22,7 +22,7 @@ class EnhancedInvoiceController {
     }
   }
 
-  // GET /invoice/:id/withProfit
+  // GET /invoice/enhanced/:id/withProfit
   async getInvoiceByIdWithProfit(req, res) {
     try {
       const invoiceId = req.params.id;
@@ -39,7 +39,7 @@ class EnhancedInvoiceController {
     }
   }
 
-  // GET /invoice/client/:clientId/withProfit
+  // GET /invoice/enhanced/client/:clientId/withProfit
   async getInvoiceByClientIdWithProfit(req, res) {
     try {
       const clientId = req.params.clientId;

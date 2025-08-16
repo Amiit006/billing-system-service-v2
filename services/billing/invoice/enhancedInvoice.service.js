@@ -311,9 +311,12 @@ class EnhancedInvoiceService {
         return {
           ...invoice.toObject(),
           invoiceDetails,
-          totalProfit: Math.round(totalProfit * 100) / 100,
-          totalCost: Math.round(totalCost * 100) / 100,
-          profitMargin: totalCost > 0 ? Math.round(((totalProfit / totalCost) * 100) * 100) / 100 : 100
+          profitSummary: {
+            totalRevenue: invoice.grandTotalAmount,
+            totalCost: Math.round(totalCost * 100) / 100,
+            totalProfit: Math.round(totalProfit * 100) / 100,
+            profitPercentage: totalCost > 0 ? Math.round(((totalProfit / totalCost) * 100) * 100) / 100 : 100
+        },
         };
       })
     );
