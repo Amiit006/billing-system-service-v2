@@ -339,7 +339,14 @@ const getParticularsReport = async (fromDate, toDate, q) => {
           particulars: '$_id',
           quantity: '$quantitySum',
           inDZ: { $round: [{ $divide: ['$quantitySum', 12] }, 0] },
-          discountTotal: '$discountTotalSum'
+          discountTotal: '$discountTotalSum',
+          pricePerUnit: {
+            $cond: [
+              { $gt: ['$quantitySum', 0] },
+              { $round: [{ $divide: ['$discountTotalSum', '$quantitySum'] }, 2] },
+              null
+            ]
+          }
         }
       },
       { $sort: { particulars: -1 } } // desc like SQL
