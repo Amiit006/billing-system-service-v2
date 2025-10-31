@@ -1,6 +1,6 @@
 // ===================================
 // ENHANCED MIGRATION SCRIPT WITH INTELLIGENT CATEGORIZATION
-// File: scripts/enhancedMigrateParticulars.js
+// File: scripts/migrateParticularsToProducts.js
 // ===================================
 
 const mongoose = require('mongoose');
@@ -315,8 +315,9 @@ async function migrateParticularsToProducts() {
 
       // Create the product
       await Product.create({
-        productId: nextProductId++,
+        productId: particular.particularId,
         productName: particular.particularName,
+        discountPercentage: particular.discountPercentage,
         category: result.category,
         subCategory: result.subCategory,
         unit: "pieces",

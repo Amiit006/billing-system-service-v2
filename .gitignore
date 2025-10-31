@@ -1,3 +1,8 @@
-node_modules
+node_modules/
 .env
-.vscode
+logs/*.log
+*.log
+.DS_Store
+coverage/
+dist/
+.vscode/

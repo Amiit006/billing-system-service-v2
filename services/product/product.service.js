@@ -7,7 +7,7 @@
 // File: services/product/product.service.js
 const Product = require('./product.model');
 const ProductCategory = require('./productCategory.model');
-
+const ParticularService = require('../particular/particular.service');
 class ProductService {
   
   // Get all products with filtering
@@ -54,11 +54,9 @@ class ProductService {
       await this.validateCategory(productData.category, productData.subCategory);
 
       // Get next product ID
-      const lastProduct = await Product.findOne().sort({ productId: -1 });
-      const nextProductId = lastProduct ? lastProduct.productId + 1 : 1;
-
+      const savedParticular = await ParticularService.createParticular(productData.productName, productData.discountPercentage);
       const product = new Product({
-        productId: nextProductId,
+        productId: savedParticular.particularId,
         ...productData,
         unit: productData.unit || 'pieces',
         gender: productData.gender || 'Men',
@@ -143,46 +141,6 @@ class ProductService {
       productName: { $regex: searchTerm, $options: 'i' },
       isActive: true
     }).limit(10);
-  }
-
-  // Map particular name to product (for migration)
-  async mapParticularToProduct(particularName) {
-    // Try exact match first
-    let product = await Product.findOne({ 
-      productName: particularName,
-      isActive: true 
-    });
-
-    if (product) return product;
-
-    // Try fuzzy match
-    product = await Product.findOne({
-      productName: { $regex: particularName, $options: 'i' },
-      isActive: true
-    });
-
-    if (product) return product;
-
-    // Create generic product if not found
-    return await this.createGenericProduct(particularName);
-  }
-
-  // Create generic product for unmapped particulars
-  async createGenericProduct(particularName) {
-    const lastProduct = await Product.findOne().sort({ productId: -1 });
-    const nextProductId = lastProduct ? lastProduct.productId + 1 : 1;
-
-    const product = new Product({
-      productId: nextProductId,
-      productName: particularName,
-      category: "Tops", // Default category
-      subCategory: "Shirts", // Default subcategory
-      unit: "pieces",
-      gender: "Men",
-      isActive: true
-    });
-
-    return await product.save();
   }
 
   // Validate category and subcategory

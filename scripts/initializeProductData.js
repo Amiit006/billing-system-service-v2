@@ -16,17 +16,17 @@ async function initializeProductData() {
       {
         categoryId: 1,
         categoryName: "Bottoms",
-        subCategories: ["Jeans", "Formal Trousers", "Cotton Trousers"]
+        subCategories: ["Jeans", "Trousers", "Shorts", "Formal Pants", "Casual Pants"]
       },
       {
         categoryId: 2,
         categoryName: "Tops",
-        subCategories: ["Shirts", "T-Shirts"]
+        subCategories: ["Shirts", "T-Shirts", "Polo", "Formal Shirts", "Casual Shirts"]
       },
       {
         categoryId: 3,
         categoryName: "Winter Products",
-        subCategories: ["Jackets", "Sweaters", "Hoodies"]
+        subCategories: ["Jackets", "Sweaters", "Hoodies", "Coats", "Thermals"]
       }
     ];
 
@@ -39,31 +39,31 @@ async function initializeProductData() {
     }
 
     // 2. Initialize Basic Products from existing particulars
-    const basicProducts = [
-      { productName: "Shirts", category: "Tops", subCategory: "Shirts" },
-      { productName: "T-Shirts", category: "Tops", subCategory: "T-Shirts" },
-      { productName: "Jeans", category: "Bottoms", subCategory: "Jeans" },
-      { productName: "Formal Trousers", category: "Bottoms", subCategory: "Formal Trousers" },
-      { productName: "Cotton Trousers", category: "Bottoms", subCategory: "Cotton Trousers" },
-      { productName: "Jackets", category: "Winter Products", subCategory: "Jackets" },
-      { productName: "Sweaters", category: "Winter Products", subCategory: "Sweaters" },
-      { productName: "Hoodies", category: "Winter Products", subCategory: "Hoodies" },
-    ];
+    // const basicProducts = [
+    //   { productName: "Shirts", category: "Tops", subCategory: "Shirts" },
+    //   { productName: "T-Shirts", category: "Tops", subCategory: "T-Shirts" },
+    //   { productName: "Jeans", category: "Bottoms", subCategory: "Jeans" },
+    //   { productName: "Formal Trousers", category: "Bottoms", subCategory: "Formal Trousers" },
+    //   { productName: "Cotton Trousers", category: "Bottoms", subCategory: "Cotton Trousers" },
+    //   { productName: "Jackets", category: "Winter Products", subCategory: "Jackets" },
+    //   { productName: "Sweaters", category: "Winter Products", subCategory: "Sweaters" },
+    //   { productName: "Hoodies", category: "Winter Products", subCategory: "Hoodies" },
+    // ];
 
-    let productId = 1;
-    for (const product of basicProducts) {
-      const existing = await Product.findOne({ productName: product.productName });
-      if (!existing) {
-        await Product.create({
-          productId: productId++,
-          ...product,
-          unit: "pieces",
-          gender: "Men",
-          isActive: true
-        });
-        console.log(`Created product: ${product.productName}`);
-      }
-    }
+    // let productId = 1;
+    // for (const product of basicProducts) {
+    //   const existing = await Product.findOne({ productName: product.productName });
+    //   if (!existing) {
+    //     await Product.create({
+    //       productId: productId++,
+    //       ...product,
+    //       unit: "pieces",
+    //       gender: "Men",
+    //       isActive: true
+    //     });
+    //     console.log(`Created product: ${product.productName}`);
+    //   }
+    // }
 
     console.log('Product data initialization completed!');
     process.exit(0);
