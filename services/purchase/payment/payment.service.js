@@ -6,18 +6,12 @@ const PurchasePayment = require('./payment.model');
  * Validates against overpayment and ensures purchase exists for given season and purchaseId.
  */
 async function createPayment(seasonId, purchaseId, paymentData) {
-  const purchase = await Purchase.findOne({
-    purchaseId: purchaseId,
-    season: seasonId,
-  }).populate('payments');
+  const purchase = await Purchase.findOne({ purchaseId, seasonId }).lean();
+  if (!purchase) throw Object.assign(new Error('Purchase not found!'), { status: 404 });
 
-  if (!purchase) {
-    const err = new Error('Purchase not found!');
-    err.status = 404;
-    throw err;
-  }
+  const payments = await PurchasePayment.find({ purchaseId: purchase.purchaseId }).select('amount');
 
-  const totalPaid = (purchase.payments || []).reduce((acc, p) => acc + p.amount, 0);
+  const totalPaid = (payments || []).reduce((acc, p) => acc + p.amount, 0);
 
   const finalPayableAmount =
     (purchase.purchaseAmount || 0) +
@@ -35,6 +29,7 @@ async function createPayment(seasonId, purchaseId, paymentData) {
   // Save the new payment
   const payment = new PurchasePayment({
     ...paymentData,
+    purchaseId: purchase.purchaseId,
     createdDate: new Date(),
     modifiedDate: new Date(),
   });
@@ -42,10 +37,10 @@ async function createPayment(seasonId, purchaseId, paymentData) {
   await payment.save();
 
   // Add payment reference to Purchase
-  await Purchase.updateOne(
-    { purchaseId: purchaseId },
-    { $push: { payments: payment._id } }
-  );
+  // await Purchase.updateOne(
+  //   { purchaseId: purchaseId },
+  //   { $push: { payments: payment._id } }
+  // );
 
   return payment;
 }

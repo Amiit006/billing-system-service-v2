@@ -66,13 +66,13 @@ const getTradeBookReport = async (req, res) => {
 
 const getParticularsReport = async (req, res) => {
   try {
-    const { from_date, to_date } = req.query;
+    const { from_date, to_date, q } = req.query;
     
     if (!from_date || !to_date) {
       return res.status(400).json({ error: 'from_date and to_date are required' });
     }
     
-    const result = await reportService.getParticularsReport(from_date, to_date);
+    const result = await reportService.getParticularsReport(from_date, to_date, q);
     return res.status(200).json(result);
   } catch (error) {
     console.error('Error fetching particulars report:', error);
