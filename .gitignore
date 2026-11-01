@@ -5,3 +5,6 @@ logs/*.log
 coverage/
 dist/
 .vscode/
+.env
+.env.*
+setup/*
